@@ -4,7 +4,7 @@ const InvariantError = require('../../exception/InvariantError')
 const { mapDBToModel } = require('../../utils/albums')
 const NotFoundError = require('../../exception/NotFoundError')
 
-class AlbumService {
+class AlbumsService {
   constructor() {
     this._pool = Pool
   }
@@ -78,4 +78,4 @@ class AlbumService {
   }
 }
 
-module.exports = AlbumService
+module.exports = AlbumsService
