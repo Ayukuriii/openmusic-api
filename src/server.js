@@ -9,7 +9,7 @@ const AlbumsValidator = require('./validator/albums')
 
 // const songs = require('./api/songs')
 // const SongsService = require('')
-// const Songs Validator = require('')
+// const SongsValidator = require('')
 
 const init = async () => {
   const albumsService = new AlbumsService()
