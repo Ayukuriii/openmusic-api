@@ -36,10 +36,17 @@ class SongsHandler {
 
   async getSongsHandler() {
     const songs = await this._service.getSongs()
+
+    const filter = songs.map((i) => ({
+      id: i.id,
+      title: i.title,
+      performer: i.performer,
+    }))
+
     return {
       status: 'success',
       data: {
-        songs,
+        songs: filter,
       },
     }
   }

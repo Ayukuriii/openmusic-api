@@ -1,7 +1,7 @@
 const Joi = require('joi')
 
 const SongPayloadSchema = Joi.object({
-  albumId: Joi.string(),
+  albumId: Joi.string().empty(''),
   title: Joi.string().required(),
   year: Joi.number().required(),
   genre: Joi.string().required(),
