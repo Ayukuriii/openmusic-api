@@ -10,9 +10,9 @@ class AlbumsHandler {
 
   async postAlbumHandler(request, h) {
     this._validator.validateAlbumPayload(request.payload)
-    const { title, year } = request.payload
+    const { name, year } = request.payload
 
-    const albumId = await this._service.addAlbum({ title, year })
+    const albumId = await this._service.addAlbum({ name, year })
 
     const response = h.response({
       status: 'success',
@@ -48,11 +48,11 @@ class AlbumsHandler {
     }
   }
 
-  putAlbumByIdHandler(request) {
+  async putAlbumByIdHandler(request) {
     this._validator.validateAlbumPayload(request.payload)
     const { id } = request.params
 
-    this._service.editAlbumById(id, request.payload)
+    await this._service.editAlbumById(id, request.payload)
 
     return {
       status: 'success',
@@ -60,9 +60,9 @@ class AlbumsHandler {
     }
   }
 
-  deleteAlbumByIdHandler(request) {
+  async deleteAlbumByIdHandler(request) {
     const { id } = request.params
-    this._service.deleteAlbumById(id)
+    await this._service.deleteAlbumById(id)
 
     return {
       status: 'success',

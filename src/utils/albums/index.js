@@ -1,11 +1,11 @@
 /* eslint-disable object-curly-newline */
 /* eslint-disable camelcase */
-const mapDBToModelAlbum = ({ id, title, year, created_at, updated_at }) => ({
+const mapDBToModelAlbum = ({ id, name, year, created_at, updated_at }) => ({
   id,
-  title,
+  name,
   year,
   createdAt: created_at,
   updatedAt: updated_at,
 })
 
-module.exports = mapDBToModelAlbum
+module.exports = { mapDBToModelAlbum }
