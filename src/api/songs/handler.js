@@ -1,3 +1,4 @@
+/* eslint-disable no-else-return */
 /* eslint-disable object-curly-newline */
 const autoBind = require('auto-bind')
 
@@ -34,19 +35,31 @@ class SongsHandler {
     return response
   }
 
-  async getSongsHandler() {
+  async getSongsHandler(request) {
+    const { title = '', performer = '' } = request.query
     const songs = await this._service.getSongs()
 
-    const filter = songs.map((i) => ({
-      id: i.id,
-      title: i.title,
-      performer: i.performer,
+    const filteredSongs = songs.filter((song) => {
+      const searchTitle = title.toLowerCase()
+      const searchPerformer = performer.toLowerCase()
+
+      return (
+        (!searchTitle || song.title.toLowerCase().includes(searchTitle)) &&
+        (!searchPerformer ||
+          song.performer.toLowerCase().includes(searchPerformer))
+      )
+    })
+
+    const formattedSongs = filteredSongs.map((song) => ({
+      id: song.id,
+      title: song.title,
+      performer: song.performer,
     }))
 
     return {
       status: 'success',
       data: {
-        songs: filter,
+        songs: formattedSongs,
       },
     }
   }

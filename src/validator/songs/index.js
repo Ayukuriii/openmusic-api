@@ -9,6 +9,14 @@ const SongsValidator = {
       throw new InvariantError(validationResult.error.message)
     }
   },
+  // validateQuery: (query) => {
+  //   const validationResult = SongPayloadSchema.validate(query)
+
+  //   if (validationResult.error) {
+  //     throw new Error(validationResult.error.message)
+  //   }
+  //   return validationResult
+  // },
 }
 
 module.exports = SongsValidator
