@@ -12,11 +12,18 @@ exports.up = (pgm) => {
     },
     owner: {
       type: 'VARCHAR(50)',
+    },
+    created_at: {
+      type: 'TEXT',
+      notNull: true,
+    },
+    updated_at: {
+      type: 'TEXT',
       notNull: true,
     },
   })
 
-  //add constraint FK 
+  //add constraint FK
   pgm.addConstraint(
     'playlists',
     'fk_playlists.owner_users.id',
