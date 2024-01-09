@@ -5,4 +5,4 @@ const mapDBToModelPlaylist = ({ id, name, owner, created_at, updated_at }) => ({
   createdAt: created_at,
   updated_at,
 })
-module.exports = mapDBToModelPlaylist
+module.exports = { mapDBToModelPlaylist }

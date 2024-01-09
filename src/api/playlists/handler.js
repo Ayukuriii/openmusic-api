@@ -59,7 +59,7 @@ class PlaylistHandler {
     } catch (error) {
       if (error instanceof ClientError) {
         const response = h.response({
-          staus: 'fail',
+          status: 'fail',
           message: error.message,
         })
 
@@ -127,29 +127,41 @@ class PlaylistHandler {
   }
 
   async getPlaylistSongHandler(request) {
+    const { id } = request.params
     const { id: credentialId } = request.auth.credentials
-    const playlistId = request.params
 
-    await this._service.verifyPlaylistOwner(playlistId, credentialId)
+    await this._service.verifyPlaylistAccess(id, credentialId)
 
-    const playlist = await this._service.getPlaylistById(playlistId)
-    const playlistSong = await this._service.getPlaylistSongs(playlistId)
+    const playlist = await this._service.getPlaylistById(id, credentialId)
+    const playlistSongs = await this._service.getPlaylistSongs(id)
+
+    const transformedPlaylist = {
+      id: playlist.id,
+      name: playlist.name,
+      username: playlist.username,
+      songs: playlistSongs.map((song) => ({
+        id: `song-${song.id}`,
+        title: song.title,
+        performer: song.performer,
+      })),
+    }
 
     return {
       status: 'success',
       data: {
-        playlist,
-        playlistSong,
+        playlist: transformedPlaylist,
       },
     }
   }
 
   async deletePlaylistSongHandler(request) {
     this._validator.validatePlaylistSongPayload(request.payload)
-    const { playlistId } = request.params
+    const { id } = request.params
     const { songId } = request.payload
+    const { id: credentialId } = request.auth.credentials
 
-    await this._service.deletePlaylistSongById(playlistId, songId)
+    await this._service.verifyPlaylistAccess(id, credentialId)
+    await this._service.deletePlaylistSongById(id, songId)
 
     return {
       status: 'success',
