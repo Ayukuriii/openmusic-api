@@ -23,7 +23,7 @@ exports.up = (pgm) => {
     },
   })
 
-  //add constraint FK
+  // add constraint FK
   pgm.addConstraint(
     'playlists',
     'fk_playlists.owner_users.id',
