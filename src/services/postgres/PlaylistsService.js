@@ -1,3 +1,4 @@
+/* eslint-disable no-useless-catch */
 const { nanoid } = require('nanoid')
 const { Pool } = require('pg')
 const InvariantError = require('../../exception/InvariantError')
@@ -6,8 +7,9 @@ const AuthorizationError = require('../../exception/AuthorizationError')
 const { mapDBToModelPlaylist } = require('../../utils/playlists')
 
 class PlaylistsService {
-  constructor() {
+  constructor(collaborationService) {
     this._pool = new Pool()
+    this._collaborationService = collaborationService
   }
 
   async addPlaylist({ name, owner }) {
@@ -89,15 +91,14 @@ class PlaylistsService {
     if (!result.rowCount) {
       throw new InvariantError('Lagu gagal ditambahkan ke playlist')
     }
-    console.log(result.rows[0])
 
     return result.rows[0].id
   }
 
-  async getPlaylistSongs(playlist_id) {
+  async getPlaylistSongs(playlsitId) {
     const query = {
       text: 'SELECT songs.id, songs.title, songs.performer FROM songs JOIN playlist_songs ON songs.id = playlist_songs.id WHERE playlist_songs.palylist_id = $1',
-      values: [playlist_id],
+      values: [playlsitId],
     }
 
     const result = await this._pool.query(query)
@@ -108,10 +109,10 @@ class PlaylistsService {
     return result.rows.map(mapDBToModelPlaylist)
   }
 
-  async deletePlaylistSongById(playlist_id, song_id) {
+  async deletePlaylistSongById(playlistId, songId) {
     const query = {
       text: 'DELETE FROM collaborations WHERE playlist_id = $1, AND song_id = $2 RETURNING id',
-      values: [playlist_id, song_id],
+      values: [playlistId, songId],
     }
 
     const result = await this._pool.query(query)
@@ -121,10 +122,10 @@ class PlaylistsService {
     }
   }
 
-  async verifyPlaylistOwner(id, owner) {
+  async verifyPlaylistOwner(playlistId, userId) {
     const query = {
       text: 'SELECT * FROM playlists WHERE id = $1',
-      values: [id],
+      values: [playlistId],
     }
 
     const result = await this._pool.query(query)
@@ -135,8 +136,25 @@ class PlaylistsService {
 
     const playlist = result.rows[0]
 
-    if (playlist.owner !== owner) {
+    if (playlist.owner !== userId) {
       throw new AuthorizationError('Anda tidak berhak mengakses resource ini')
+    }
+  }
+
+  async verifyPlaylistAccess(playlistId, userId) {
+    console.log(playlistId, userId)
+    try {
+      await this.verifyPlaylistOwner(playlistId, userId)
+    } catch (error) {
+      if (error instanceof NotFoundError) {
+        throw error
+      }
+
+      try {
+        await this._collaborationService.verifyCollbaorator(playlistId, userId)
+      } catch {
+        throw error
+      }
     }
   }
 }
