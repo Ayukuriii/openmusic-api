@@ -1,7 +1,3 @@
-/* eslint-disable camelcase */
-
-exports.shorthands = undefined
-
 exports.up = (pgm) => {
   pgm.addConstraint(
     'songs',
@@ -11,5 +7,5 @@ exports.up = (pgm) => {
 }
 
 exports.down = (pgm) => {
-  pgm.dropTable('songs')
+  pgm.dropConstraint('songs', 'fk_songs.album_id_songs.id')
 }
