@@ -44,9 +44,9 @@ class SongsHandler {
       const searchPerformer = performer.toLowerCase()
 
       return (
-        (!searchTitle || song.title.toLowerCase().includes(searchTitle)) &&
-        (!searchPerformer ||
-          song.performer.toLowerCase().includes(searchPerformer))
+        (!searchTitle || song.title.toLowerCase().includes(searchTitle))
+        && (!searchPerformer
+          || song.performer.toLowerCase().includes(searchPerformer))
       )
     })
 

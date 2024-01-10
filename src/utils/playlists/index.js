@@ -1,4 +1,7 @@
-const mapDBToModelPlaylist = ({ id, name, owner, created_at, updated_at }) => ({
+/* eslint-disable camelcase */
+const mapDBToModelPlaylist = ({
+  id, name, owner, created_at, updated_at
+}) => ({
   id,
   name,
   owner,

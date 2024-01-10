@@ -3,7 +3,7 @@ const {
   PutAuthenticationPayloadSchema,
   DeleteAuthenticationPayloadSchema,
 } = require('./schema')
-const InvariantError = require('../../exception/InvariantError.js')
+const InvariantError = require('../../exception/InvariantError')
 
 const AuthenticationsValidator = {
   validatePostAuthenticationPayload: (payload) => {
@@ -13,7 +13,7 @@ const AuthenticationsValidator = {
     }
   },
   validatePutAuthenticationPayload: (payload) => {
-    const validationResult = PutAuthenticationPayloadSchema.validate
+    const validationResult = PutAuthenticationPayloadSchema.validate(payload)
     if (validationResult.error) {
       throw new InvariantError(validationResult.error.message)
     }
