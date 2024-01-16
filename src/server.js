@@ -2,6 +2,7 @@ require('dotenv').config()
 
 const Hapi = require('@hapi/hapi')
 const Jwt = require('@hapi/jwt')
+
 const ClientError = require('./exception/ClientError')
 
 const albums = require('./api/albums')
@@ -32,6 +33,8 @@ const CollaborationValidator = require('./validator/collaborations')
 const _exports = require('./api/exports')
 const ProducerService = require('./services/rabbitmq/ProducerService')
 const ExportsValidator = require('./validator/exports')
+
+const UploadsValidator = require('./validator/uploads')
 
 const init = async () => {
   const albumsService = new AlbumsService()
@@ -79,6 +82,7 @@ const init = async () => {
       options: {
         service: albumsService,
         validator: AlbumsValidator,
+        uploadValidator: UploadsValidator,
       },
     },
     {

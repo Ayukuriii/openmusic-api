@@ -49,6 +49,21 @@ class AlbumsService {
     return mapDBToModelAlbum(result.rows[0])
   }
 
+  async getAlbumCoverById(id) {
+    const query = {
+      text: 'SELECT path FROM album_covers WHERE album_id = $1 LIMIT 1',
+      values: [id],
+    }
+
+    const result = await this._pool.query(query)
+
+    if (!result.rowCount) {
+      return null
+    }
+
+    return result.rows[0]
+  }
+
   async getSongsByAlbumId(albumId) {
     const query = {
       text: 'SELECT * FROM songs where album_id = $1',

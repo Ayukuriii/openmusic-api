@@ -1,9 +1,15 @@
+const path = require('path')
 const autoBind = require('auto-bind')
+const StorageService = require('../../services/storage/StorageService')
 
 class AlbumsHandler {
-  constructor(service, validator) {
+  constructor(service, validator, uploadValidator) {
     this._service = service
     this._validator = validator
+    this._uploadValidator = uploadValidator
+    this._storageService = new StorageService(
+      path.resolve(__dirname, 'file/covers')
+    )
 
     autoBind(this)
   }
@@ -40,11 +46,15 @@ class AlbumsHandler {
     const { id } = request.params
     const album = await this._service.getAlbumById(id)
     const songs = await this._service.getSongsByAlbumId(id)
+    const cover = await this._service.getAlbumCoverById(id)
+
+    const filePath = cover?.path ?? null
 
     const i = {
       id: album.id,
       name: album.name,
       year: album.year,
+      coverUrl: filePath,
     }
 
     return {
@@ -78,6 +88,39 @@ class AlbumsHandler {
       status: 'success',
       message: 'Album berhasil dihapus',
     }
+  }
+
+  async postUploadImageHandler(request, h) {
+    const { cover } = request.payload
+    const { id: albumId } = request.params
+    const fileSize = cover._data.length
+
+    if (fileSize > 512000) {
+      return h
+        .response({
+          status: 'fail',
+          message: 'Ukuran file terlalu besar',
+        })
+        .code(413)
+    }
+
+    this._uploadValidator.validateImageHeaders(cover.hapi.headers)
+
+    const filename = await this._storageService.writeFile(
+      cover,
+      cover.hapi,
+      albumId
+    )
+
+    const response = h.response({
+      status: 'success',
+      message: 'Sampul berhasil diunggah',
+      data: {
+        fileLocation: `http://${process.env.HOST}:${process.env.PORT}/albums/images/${filename}`,
+      },
+    })
+    response.code(201)
+    return response
   }
 }
 
