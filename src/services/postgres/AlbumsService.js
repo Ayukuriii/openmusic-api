@@ -134,6 +134,8 @@ class AlbumsService {
       throw new InvariantError('Gagal menambahkan like')
     }
 
+    await this._cacheService.delete(`albumsLike:${albumId}`)
+
     return result.rows[0]
   }
 
@@ -153,7 +155,8 @@ class AlbumsService {
 
       const result = await this._pool.query(query)
 
-      const totalLikes = result.rows.length > 0 ? parseInt(result.rows[0].total_likes, 10) : 0
+      const totalLikes =
+        result.rows.length > 0 ? parseInt(result.rows[0].total_likes, 10) : 0
 
       await this._cacheService.set(
         `albumsLike:${albumId}`,
