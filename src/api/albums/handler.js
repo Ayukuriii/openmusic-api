@@ -1,15 +1,12 @@
-const path = require('path')
 const autoBind = require('auto-bind')
-const StorageService = require('../../services/storage/StorageService')
+const StorageService = require('../../services/S3/StrorageService')
 
 class AlbumsHandler {
   constructor(service, validator, uploadValidator) {
     this._service = service
     this._validator = validator
     this._uploadValidator = uploadValidator
-    this._storageService = new StorageService(
-      path.resolve(__dirname, 'file/covers')
-    )
+    this._storageService = new StorageService()
 
     autoBind(this)
   }
@@ -106,7 +103,7 @@ class AlbumsHandler {
 
     this._uploadValidator.validateImageHeaders(cover.hapi.headers)
 
-    const filename = await this._storageService.writeFile(
+    const fileLocation = await this._storageService.writeFile(
       cover,
       cover.hapi,
       albumId
@@ -116,11 +113,56 @@ class AlbumsHandler {
       status: 'success',
       message: 'Sampul berhasil diunggah',
       data: {
-        fileLocation: `http://${process.env.HOST}:${process.env.PORT}/albums/images/${filename}`,
+        fileLocation,
       },
     })
     response.code(201)
     return response
+  }
+
+  async postLikeAlbumByIdHandler(request, h) {
+    const { id: albumId } = request.params
+    const { id: credentialId } = request.auth.credentials
+
+    await this._service.addLikeAlbumById(albumId, credentialId)
+
+    const response = h.response({
+      status: 'success',
+      message: 'Anda menyukai album ini',
+    })
+
+    response.code(201)
+
+    return response
+  }
+
+  async getLikeAlbumsHandler(request, h) {
+    const { id: albumId } = request.params
+
+    const like = await this._service.getLikeAlbums(albumId)
+
+    const response = h.response({
+      status: 'success',
+      data: {
+        likes: like,
+      },
+    })
+
+    response.code(200)
+
+    return response
+  }
+
+  async deleteLikeAlbumByIdHandler(request) {
+    const { id: albumId } = request.params
+    const { id: credentialId } = request.auth.credentials
+
+    await this._service.deleteLikeAlbumById(albumId, credentialId)
+
+    return {
+      status: 'success',
+      message: 'Anda berhasil menghapus like',
+    }
   }
 }
 

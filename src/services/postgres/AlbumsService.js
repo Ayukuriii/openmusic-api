@@ -102,6 +102,65 @@ class AlbumsService {
       throw new NotFoundError('Album gagal dihapus. Id tidak ditemukan.')
     }
   }
+
+  async addLikeAlbumById(albumId, userId) {
+    const id = nanoid(16)
+
+    const checkAlbum = {
+      text: 'SELECT id FROM albums WHERE id = $1',
+      values: [albumId],
+    }
+    const checkAlbumResult = await this._pool.query(checkAlbum)
+    if (!checkAlbumResult.rowCount) {
+      throw new NotFoundError('Album tidak ditemukan')
+    }
+
+    const checkQuery = {
+      text: 'SELECT COUNT(*) FROM likes WHERE user_id = $2 AND album_id = $1',
+      values: [albumId, userId],
+    }
+    const checkResult = await this._pool.query(checkQuery)
+    if (checkResult.rows[0].count > 0) {
+      throw new InvariantError('Anda telah menyukai album ini sebelumnya')
+    }
+
+    const insertQuery = {
+      text: 'INSERT INTO likes VALUES($1, $2, $3)',
+      values: [id, albumId, userId],
+    }
+    const result = await this._pool.query(insertQuery)
+    if (!result.rowCount) {
+      throw new InvariantError('Gagal menambahkan like')
+    }
+
+    return result.rows[0]
+  }
+
+  async getLikeAlbums(albumId) {
+    const query = {
+      text: 'SELECT COUNT(*) AS total_likes FROM likes WHERE album_id = $1',
+      values: [albumId],
+    }
+
+    const result = await this._pool.query(query)
+
+    const totalLikes = result.rows.length > 0 ? parseInt(result.rows[0].total_likes, 10) : 0
+
+    return totalLikes
+  }
+
+  async deleteLikeAlbumById(albumId, userId) {
+    const query = {
+      text: 'DELETE FROM likes WHERE album_id = $1 AND user_id = $2',
+      values: [albumId, userId],
+    }
+
+    const result = await this._pool.query(query)
+
+    if (!result.rowCount) {
+      throw new InvariantError('Gagal menghapus like')
+    }
+  }
 }
 
 module.exports = AlbumsService
