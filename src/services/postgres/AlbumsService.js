@@ -6,8 +6,9 @@ const { mapDBToModelSong } = require('../../utils/songs')
 const NotFoundError = require('../../exception/NotFoundError')
 
 class AlbumsService {
-  constructor() {
+  constructor(cacheService) {
     this._pool = new Pool()
+    this._cacheService = cacheService
   }
 
   async addAlbum({ name, year }) {
@@ -137,16 +138,33 @@ class AlbumsService {
   }
 
   async getLikeAlbums(albumId) {
-    const query = {
-      text: 'SELECT COUNT(*) AS total_likes FROM likes WHERE album_id = $1',
-      values: [albumId],
+    try {
+      const result = await this._cacheService.get(`albumsLike:${albumId}`)
+
+      return {
+        like: JSON.parse(result),
+        source: 'cache',
+      }
+    } catch (error) {
+      const query = {
+        text: 'SELECT COUNT(*) AS total_likes FROM likes WHERE album_id = $1',
+        values: [albumId],
+      }
+
+      const result = await this._pool.query(query)
+
+      const totalLikes = result.rows.length > 0 ? parseInt(result.rows[0].total_likes, 10) : 0
+
+      await this._cacheService.set(
+        `albumsLike:${albumId}`,
+        JSON.stringify(totalLikes)
+      )
+
+      return {
+        like: totalLikes,
+        source: 'db',
+      }
     }
-
-    const result = await this._pool.query(query)
-
-    const totalLikes = result.rows.length > 0 ? parseInt(result.rows[0].total_likes, 10) : 0
-
-    return totalLikes
   }
 
   async deleteLikeAlbumById(albumId, userId) {
@@ -160,6 +178,7 @@ class AlbumsService {
     if (!result.rowCount) {
       throw new InvariantError('Gagal menghapus like')
     }
+    await this._cacheService.delete(`albumsLike:${albumId}`)
   }
 }
 

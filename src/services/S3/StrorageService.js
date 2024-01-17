@@ -46,7 +46,7 @@ class StorageService {
     if (!result.rowCount) {
       throw new InvariantError('Gagal membuat link Url')
     }
-    console.log(url)
+
     return url
   }
 

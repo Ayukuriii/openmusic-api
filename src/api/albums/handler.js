@@ -139,7 +139,7 @@ class AlbumsHandler {
   async getLikeAlbumsHandler(request, h) {
     const { id: albumId } = request.params
 
-    const like = await this._service.getLikeAlbums(albumId)
+    const { like, source } = await this._service.getLikeAlbums(albumId)
 
     const response = h.response({
       status: 'success',
@@ -149,6 +149,7 @@ class AlbumsHandler {
     })
 
     response.code(200)
+    response.header('X-Data-Source', source)
 
     return response
   }
