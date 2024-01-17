@@ -13,4 +13,6 @@ const ImageHeadersSchema = Joi.object({
     .required(),
 }).unknown()
 
-module.exports = { ImageHeadersSchema }
+const ImageSizeSchema = Joi.number().max(512000)
+
+module.exports = { ImageHeadersSchema, ImageSizeSchema }

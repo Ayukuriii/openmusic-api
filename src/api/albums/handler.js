@@ -90,17 +90,8 @@ class AlbumsHandler {
   async postUploadImageHandler(request, h) {
     const { cover } = request.payload
     const { id: albumId } = request.params
-    const fileSize = cover._data.length
 
-    if (fileSize > 512000) {
-      return h
-        .response({
-          status: 'fail',
-          message: 'Ukuran file terlalu besar',
-        })
-        .code(413)
-    }
-
+    this._uploadValidator.validateImageSize(cover._data.length)
     this._uploadValidator.validateImageHeaders(cover.hapi.headers)
 
     const fileLocation = await this._storageService.writeFile(
