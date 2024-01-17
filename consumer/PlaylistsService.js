@@ -21,9 +21,9 @@ class PlaylistsService {
             JOIN 
               songs ON playlist_songs.song_id = songs.id
             WHERE 
-              playlists.owner = $1 AND playlists.id = $2
+              playlists.id = $1
           `,
-      values: [userId, playlistId],
+      values: [playlistId],
     }
 
     const result = await this._pool.query(query)
