@@ -5,7 +5,7 @@ class PlaylistsService {
     this._pool = new Pool()
   }
 
-  async getPlaylists(userId, playlistId) {
+  async getPlaylists(playlistId) {
     const query = {
       text: `
             SELECT 
